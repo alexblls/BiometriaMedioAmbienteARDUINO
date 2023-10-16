@@ -146,7 +146,7 @@ void startAdvertising(uint8_t ppm) {
   uint8_t beaconUUID[16] = {'P', 'R', 'O', 'Y', '3', 'A', '-', 'F', 'O', 'N', 'D', 'O', '-', 'S', 'U', 'R'};
 
   // Configura un objeto BLEBeacon con el UUID, el major, el minor y otro
-  BLEBeacon elBeacon(beaconUUID, 20, 150, 10);
+  BLEBeacon elBeacon(beaconUUID, 98, 150, 10);
   //BLEBeacon elBeacon(beaconUUID, ppm, 150, 10);
   elBeacon.setManufacturer( 0x004c ); // aple id
 
