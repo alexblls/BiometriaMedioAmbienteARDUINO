@@ -1,31 +1,35 @@
-//Incluir librerias
+// Incluir librerias
 #include <bluefruit.h>
+
+// Definir una instancia de BLEUart para comunicación Bluetooth
 BLEUart bleuart;
 
-//Definir pines
-int gasPin = 5;
-int refPin = 28;
-int tempPin = 29;
+// Definir pines para lecturas analógicas
+int gasPin = 5;  // Pin para lectura de sensor de gas
+int refPin = 28; // Pin para lectura de referencia
+int tempPin = 29; // Pin para lectura de temperatura
 
-float arrayt[60];
-int cont;
-
+//float arrayt[60];
+//int cont;
+ 
 void setup() {
   Serial.begin(115200);
 
-  //Definir pines como entrada
+  // Configurar pines como entrada
   pinMode(5, INPUT);
   pinMode(28, INPUT);
   pinMode(29, INPUT);
 
+  // Inicializar el módulo Bluetooth
   Bluefruit.begin();
 
+  // Configurar el nombre del dispositivo Bluetooth
   Bluefruit.setName("PROY3A-FONDO-SUR");
   Bluefruit.ScanResponse.addName();
 
-  for (int i = 0; i < sizeof(arrayt); i++) {
-    arrayt[0] = 0.0;
-  }
+  //for (int i = 0; i < sizeof(arrayt); i++) {
+  //  arrayt[0] = 0.0;
+  //}
 }
 
 void loop() {
@@ -104,13 +108,16 @@ void loop() {
   delay(1100);//Espera de 1100ms
 }
 
-//Funcion para normalizar valores
 float normalizar(float valor) {
   float respuesta = (valor * 3.3) / (pow(2, 12) - 1);
   return respuesta;
 }
 
-//Funcion para calcular la temperatura detectada por el sensor con la ecuacion del datasheet
+/**
+ * @brief Función para calcular la temperatura detectada por el sensor.
+ * @param valor Valor normalizado de temperatura.
+ * @return Temperatura calculada en grados Celsius.
+ */
 float calcularTemperatura(float valor) {
   float temperatura = 87 * valor - 18;
   if (temperatura > 20) {
@@ -120,27 +127,33 @@ float calcularTemperatura(float valor) {
   return temperatura;
 }
 
+/**
+ * @brief Iniciar la publicidad Bluetooth a traves de beacons con una concentración calculada.
+ * @param ppm Concentración en partes por millón (ppm).
+ */
 void startAdvertising(uint8_t ppm) {
 
-  Bluefruit.Advertising.stop(); // ya lo enchufo luego
+  Bluefruit.Advertising.stop(); // Detiene la publicidad Bluetooth actual
 
-  // Advertising packet
+  // Paquete de publicidad
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
   Bluefruit.Advertising.addTxPower();
 
-  // Include Name
+  // Incuimos el nombre del dispositivo
   Bluefruit.Advertising.addName();
 
+  // Define un identificador único universal (UUID) para el dispositivo
   uint8_t beaconUUID[16] = {'P', 'R', 'O', 'Y', '3', 'A', '-', 'F', 'O', 'N', 'D', 'O', '-', 'S', 'U', 'R'};
 
-  BLEBeacon elBeacon(beaconUUID, 130, 150, 10);
+  // Configura un objeto BLEBeacon con el UUID, el major, el minor y otro
+  BLEBeacon elBeacon(beaconUUID, 90, 150, 10);
   //BLEBeacon elBeacon(beaconUUID, ppm, 150, 10);
   elBeacon.setManufacturer( 0x004c ); // aple id
 
+  // Configura los parámetros de la publicidad Bluetooth
   Bluefruit.Advertising.setBeacon(elBeacon);
   Bluefruit.Advertising.restartOnDisconnect(true);
   Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
   Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
-
 }
